@@ -3,76 +3,72 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Show Circle Demo</title>
+  <title>Circle with Message</title>
   <style>
     body {
       margin: 0;
       height: 100vh;
       overflow: hidden;
+      background: #f0f0f0;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f0f0f0;
       font-family: sans-serif;
     }
 
-    p {
-      position: absolute;
-      top: 10px;
-      width: 100%;
-      text-align: center;
-      color: #333;
+    /* style for the circle after it's grown and gets the message-ball class */
+    .message-ball {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background-color: #007acc;
+      font-size: 1em;
     }
   </style>
 </head>
 
 <body>
 
-  <p>Click anywhere to show a growing circle animation</p>
-
   <script>
     /**
-     * Creates an animated circle at (cx, cy) growing to the given radius.
-     * Returns a Promise that resolves when the animation finishes.
+     * Draws an animating circle at (cx, cy) growing to `radius`.
+     * Calls `callback(div)` once the growth animation finishes.
      */
-    function showCircle(cx, cy, radius) {
-      return new Promise((resolve) => {
-        const circle = document.createElement('div');
+    function showCircle(cx, cy, radius, callback) {
+      const circle = document.createElement('div');
 
-        Object.assign(circle.style, {
-          position: 'absolute',
-          left: cx + 'px',
-          top: cy + 'px',
-          width: '0px',
-          height: '0px',
-          border: '2px solid #007ACC',
-          borderRadius: '50%',
-          transform: 'translate(-50%, -50%)',
-          transition: 'width 1s ease, height 1s ease'
-        });
-
-        document.body.appendChild(circle);
-
-        // Trigger layout + start the transition
-        requestAnimationFrame(() => {
-          circle.style.width = radius * 2 + 'px';
-          circle.style.height = radius * 2 + 'px';
-        });
-
-        // Resolve when transition ends
-        circle.addEventListener('transitionend', () => {
-          resolve(circle);
-        }, { once: true });
+      Object.assign(circle.style, {
+        position: 'absolute',
+        left: cx + 'px',
+        top: cy + 'px',
+        width: '0px',
+        height: '0px',
+        border: '2px solid #007acc',
+        borderRadius: '50%',
+        transform: 'translate(-50%, -50%)',
+        transition: 'width 1s ease, height 1s ease'
       });
+
+      document.body.appendChild(circle);
+
+      // trigger the transition
+      requestAnimationFrame(() => {
+        circle.style.width = radius * 2 + 'px';
+        circle.style.height = radius * 2 + 'px';
+      });
+
+      // once done, run the callback with the <div> element
+      circle.addEventListener('transitionend', () => {
+        callback(circle);
+      }, { once: true });
     }
 
-    // Example usage: click to show a circle radius 80px
-    document.addEventListener('click', event => {
-      showCircle(event.clientX, event.clientY, 80)
-        .then(circle => {
-          // Remove the circle after animation completes + optional delay
-          setTimeout(() => circle.remove(), 500);
-        });
+    // example usage:
+    showCircle(150, 150, 100, div => {
+      // add a background & center text
+      div.classList.add('message-ball');
+      div.textContent = 'Hello, world!';
     });
   </script>
 
