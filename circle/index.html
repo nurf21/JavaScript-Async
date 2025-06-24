@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Show Circle Demo</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f0f0;
+      font-family: sans-serif;
+    }
+
+    p {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      text-align: center;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+
+  <p>Click anywhere to show a growing circle animation</p>
+
+  <script>
+    /**
+     * Creates an animated circle at (cx, cy) growing to the given radius.
+     * Returns a Promise that resolves when the animation finishes.
+     */
+    function showCircle(cx, cy, radius) {
+      return new Promise((resolve) => {
+        const circle = document.createElement('div');
+
+        Object.assign(circle.style, {
+          position: 'absolute',
+          left: cx + 'px',
+          top: cy + 'px',
+          width: '0px',
+          height: '0px',
+          border: '2px solid #007ACC',
+          borderRadius: '50%',
+          transform: 'translate(-50%, -50%)',
+          transition: 'width 1s ease, height 1s ease'
+        });
+
+        document.body.appendChild(circle);
+
+        // Trigger layout + start the transition
+        requestAnimationFrame(() => {
+          circle.style.width = radius * 2 + 'px';
+          circle.style.height = radius * 2 + 'px';
+        });
+
+        // Resolve when transition ends
+        circle.addEventListener('transitionend', () => {
+          resolve(circle);
+        }, { once: true });
+      });
+    }
+
+    // Example usage: click to show a circle radius 80px
+    document.addEventListener('click', event => {
+      showCircle(event.clientX, event.clientY, 80)
+        .then(circle => {
+          // Remove the circle after animation completes + optional delay
+          setTimeout(() => circle.remove(), 500);
+        });
+    });
+  </script>
+
+</body>
+
+</html>
