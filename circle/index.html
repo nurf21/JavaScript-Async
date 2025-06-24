@@ -35,40 +35,40 @@
      * Draws an animating circle at (cx, cy) growing to `radius`.
      * Calls `callback(div)` once the growth animation finishes.
      */
-    function showCircle(cx, cy, radius, callback) {
-      const circle = document.createElement('div');
+    function showCircle(cx, cy, radius) {
+      return new Promise(resolve => {
+        // 1) Create the circle element
+        const circle = document.createElement('div');
+        Object.assign(circle.style, {
+          position: 'absolute',
+          left: cx + 'px',
+          top: cy + 'px',
+          width: '0px',
+          height: '0px',
+          border: '2px solid #007acc',
+          borderRadius: '50%',
+          transform: 'translate(-50%, -50%)',
+          transition: 'width 1s ease, height 1s ease'
+        });
+        document.body.appendChild(circle);
 
-      Object.assign(circle.style, {
-        position: 'absolute',
-        left: cx + 'px',
-        top: cy + 'px',
-        width: '0px',
-        height: '0px',
-        border: '2px solid #007acc',
-        borderRadius: '50%',
-        transform: 'translate(-50%, -50%)',
-        transition: 'width 1s ease, height 1s ease'
+        // 2) Kick off the CSS transition on the next frame
+        requestAnimationFrame(() => {
+          circle.style.width = radius * 2 + 'px';
+          circle.style.height = radius * 2 + 'px';
+        });
+
+        // 3) Resolve the promise when animation completes
+        circle.addEventListener('transitionend', () => {
+          resolve(circle);
+        }, { once: true });
       });
-
-      document.body.appendChild(circle);
-
-      // trigger the transition
-      requestAnimationFrame(() => {
-        circle.style.width = radius * 2 + 'px';
-        circle.style.height = radius * 2 + 'px';
-      });
-
-      // once done, run the callback with the <div> element
-      circle.addEventListener('transitionend', () => {
-        callback(circle);
-      }, { once: true });
     }
 
     // example usage:
-    showCircle(150, 150, 100, div => {
-      // add a background & center text
+    showCircle(150, 150, 100).then(div => {
       div.classList.add('message-ball');
-      div.textContent = 'Hello, world!';
+      div.append("Hello, world!");
     });
   </script>
 
