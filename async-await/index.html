@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub User Demo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2em;
+      line-height: 1.4;
+    }
+
+    button {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    pre {
+      background: #f5f5f5;
+      padding: 1em;
+      border-radius: 4px;
+      max-width: 600px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>GitHub User Lookup</h1>
+  <p>
+    Click the button below to fetch a GitHub user.
+    You’ll be prompted for a username.
+    If it exists, you’ll see an alert with their full name;
+    otherwise you can retry.
+  </p>
+  <button id="start">Find GitHub User</button>
+  <pre id="result"></pre>
+
+  <script>
+    class HttpError extends Error {
+      constructor(response) {
+        super(response.status + " for " + response.url);
+        this.name = 'HttpError';
+        this.response = response;
+      }
+    }
+
+    async function loadJson(url) {
+      const response = await fetch(url);
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        throw new HttpError(response);
+      }
+    }
+
+    async function demoGithubUser() {
+      while (true) {
+        const name = prompt("Enter a GitHub username:", "nurf21");
+        if (name === null) {
+          // user cancelled
+          return null;
+        }
+
+        try {
+          const user = await loadJson(`https://api.github.com/users/${name}`);
+          alert(`Full name: ${user.name || '(no name provided)'}`);
+          return user;
+        } catch (err) {
+          if (err instanceof HttpError && err.response.status === 404) {
+            alert("No such user, please reenter.");
+            // loop continues
+          } else {
+            throw err;
+          }
+        }
+      }
+    }
+
+    document.getElementById('start').addEventListener('click', () => {
+      document.getElementById('result').textContent = '';
+      demoGithubUser()
+        .then(user => {
+          if (user) {
+            document.getElementById('result').textContent =
+              JSON.stringify(user, null, 2);
+          } else {
+            document.getElementById('result').textContent =
+              'Lookup cancelled.';
+          }
+        })
+        .catch(err => {
+          document.getElementById('result').textContent =
+            'Unexpected error:\n' + err;
+          console.error(err);
+        });
+    });
+  </script>
+</body>
+
+</html>
